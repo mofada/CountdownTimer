@@ -18,27 +18,32 @@ package com.example.androiddevchallenge
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.androiddevchallenge.ui.theme.MyTheme
 import com.example.androiddevchallenge.ui.theme.robotoMonoFamily
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             MyTheme {
                 HomePage()
@@ -49,31 +54,49 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun HomePage() {
-    Box() {
-        Box(
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.primary)
+    val viewModel: MainViewModel = viewModel()
+    //总时间
+    val count = 30
+    //高度比例
+    var heightScale by remember { mutableStateOf(viewModel.current / count.toFloat()) }
+    //动画
+    val animatorValue by animateFloatAsState(
+        heightScale,
+        animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
+    )
+
+    BoxWithConstraints(
+        Modifier.fillMaxSize(),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        //背景色, Box无法实现? 同时设置背景和高度无效?
+        //Modifier.height(this.maxHeight * animatorValue).background(MaterialTheme.colors.primary)
+        Scaffold(
+            modifier = Modifier
+                .height(this.maxHeight * animatorValue),
+            backgroundColor = MaterialTheme.colors.primary,
+            content = {
+            }
         )
 
-        LazyRow(
-            Modifier
-                .background(Color.Transparent),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            items(30) { index ->
-                Text(
-                    text = "${index * 10}",
-                    color = MaterialTheme.colors.onPrimary,
-                    fontSize = 50.sp,
-                    fontFamily = robotoMonoFamily,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(8.dp)
-                )
-            }
-        }
 
+
+        //前景文字
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(
+                text = "${viewModel.current}",
+                color = MaterialTheme.colors.onPrimary,
+                fontSize = 100.sp,
+                fontFamily = robotoMonoFamily,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .clickable {
+                        heightScale -= 1f / count
+                        viewModel.current -= 1
+                    }
+            )
+        }
     }
 }
 
