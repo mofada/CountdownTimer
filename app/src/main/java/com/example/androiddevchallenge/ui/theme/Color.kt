@@ -17,12 +17,12 @@ package com.example.androiddevchallenge.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-//light 黄黑白
+// light 黄黑白
 val lightYellow = Color(0xFFf7b142)
 val lightBlack = Color(0xFF3A190A)
 val lightWhite = Color(0xFFFAF6F0)
 
-//dark 红白黑
+// dark 红白黑
 val darkRed = Color(0xFFFE6460)
 val darkWhite = Color(0xFFFBFCFC)
 val darkBlack = Color(0xFF364153)

@@ -18,100 +18,61 @@ package com.example.androiddevchallenge
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.androiddevchallenge.ui.TimerBackground
+import com.example.androiddevchallenge.ui.TimerText
 import com.example.androiddevchallenge.ui.theme.MyTheme
-import com.example.androiddevchallenge.ui.theme.robotoMonoFamily
 
 class MainActivity : AppCompatActivity() {
+    @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
             MyTheme {
-                HomePage()
-            }
-        }
-    }
-}
+                val viewModel: MainViewModel = viewModel()
 
-@Composable
-fun HomePage() {
-    val viewModel: MainViewModel = viewModel()
-    //总时间
-    val count = 30
-    //高度比例
-    var heightScale by remember { mutableStateOf(viewModel.current / count.toFloat()) }
-    //动画
-    val animatorValue by animateFloatAsState(
-        heightScale,
-        animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
-    )
+                Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    TimerBackground(current = viewModel.current, count = viewModel.count)
 
-    BoxWithConstraints(
-        Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        //背景色, Box无法实现? 同时设置背景和高度无效?
-        //Modifier.height(this.maxHeight * animatorValue).background(MaterialTheme.colors.primary)
-        Scaffold(
-            modifier = Modifier
-                .height(this.maxHeight * animatorValue),
-            backgroundColor = MaterialTheme.colors.primary,
-            content = {
-            }
-        )
+                    TimerText(viewModel.current)
 
-
-
-        //前景文字
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(
-                text = "${viewModel.current}",
-                color = MaterialTheme.colors.onPrimary,
-                fontSize = 100.sp,
-                fontFamily = robotoMonoFamily,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .clickable {
-                        heightScale -= 1f / count
-                        viewModel.current -= 1
+                    AnimatedVisibility(visible = viewModel.current == 0) {
+                        Box(
+                            Modifier
+                                .padding(bottom = 50.dp)
+                                .size(80.dp)
+                                .clip(
+                                    CircleShape
+                                )
+                                .background(MaterialTheme.colors.primary)
+                                .animateContentSize()
+                                .clickable {
+                                    viewModel.startTimer()
+                                }
+                        ) {
+                        }
                     }
-            )
+                }
+            }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewHome() {
-    MyTheme(darkTheme = false) {
-        HomePage()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewHomeDark() {
-    MyTheme(darkTheme = true) {
-        HomePage()
     }
 }
